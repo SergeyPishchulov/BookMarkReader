@@ -3,8 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <title>BMR</title>
+    <script src="node_modules/epubjs/dist/epub.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.5/jszip.min.js"></script>
+
 </head>
 <body>
+<div id="example-epub"></div>
+<script>
+    var book = ePub("https://s3.amazonaws.com/moby-dick/OPS/package.opf");
 
+    var rendition = book.renderTo("example-epub", {method: "default"});
+    var displayed = rendition.display();
+
+
+</script>
 </body>
 </html>
