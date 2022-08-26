@@ -8,7 +8,7 @@ Base = declarative_base()
 class User(Base):
     __tablename__ = 'users'
     id = Column(Integer, primary_key=True)
-    books = relationship("Book", back_populates="user")
+    books = relationship("Book", back_populates="user")  # Class name, back_ref_name from that class
 
 
 class Book(Base):
@@ -17,22 +17,22 @@ class Book(Base):
     title = Column(String)
     user_id = Column(Integer, ForeignKey("users.id"))
     user = relationship("User", back_populates="books")
-
-# class Bookmark(Base):
-#     __tablename__ = 'bookmarks'
-#     id = Column(Integer, primary_key=True)
-#     quote = Column(String)
-#     comment = Column(String)
-#     user_id = Column(Integer, ForeignKey('users.id'))
-# user = relationship("users", back_populates="bookmarks")
-
-# class Tag(Base):
-#     __tablename__ = 'tags'
-#     id = Column(Integer, primary_key=True)
-#     tag = Column(String, nullable=False)
-#     bookmark_id = Column(Integer, ForeignKey('bookmarks.id'))
-#     bookmark = relationship("bookmarks", back_populates="tags")
+    bookmarks = relationship("Bookmark", back_populates="book")
 
 
-# Bookmark.tags = relationship("Tag", order_by=Tag.id, back_populates="bookmark")
-# User.bookmarks = relationship("Bookmark", order_by=Bookmark.id, back_populates="user")
+class Bookmark(Base):
+    __tablename__ = 'bookmarks'
+    id = Column(Integer, primary_key=True)
+    quote = Column(String)
+    comment = Column(String)
+    book_id = Column(Integer, ForeignKey('books.id'))
+    book = relationship("Book", back_populates="bookmarks")
+    tags = relationship("Tag", back_populates="bookmark")
+
+
+class Tag(Base):
+    __tablename__ = 'tags'
+    id = Column(Integer, primary_key=True)
+    tag = Column(String, nullable=False)
+    bookmark_id = Column(Integer, ForeignKey('bookmarks.id'))
+    bookmark = relationship("Bookmark", back_populates="tags")
