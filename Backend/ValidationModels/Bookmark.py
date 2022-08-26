@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from typing import List
 
-from Models.Book import Book
+from ValidationModels.Book import Book
 
 
 class Bookmark(BaseModel):

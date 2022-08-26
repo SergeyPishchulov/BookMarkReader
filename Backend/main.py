@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 
-from Models.Book import Book
-from Models.Bookmark import Bookmark
+from ValidationModels.Book import Book
+from ValidationModels.Bookmark import Bookmark
 
 app = FastAPI()
 
