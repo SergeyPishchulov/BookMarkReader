@@ -11,6 +11,8 @@ def recreate_database():
     Base.metadata.create_all(engine)
 
 
+# Base.metadata.reflect()
+# Base.metadata.tables['summary_inherited']('summary_inherited').add_is_dependent_on(summary)
 close_all_sessions()
 
 engine = create_engine(DATABASE_URI)
