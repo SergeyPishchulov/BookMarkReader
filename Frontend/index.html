@@ -1,21 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
     <title>BMR</title>
-    <script src="node_modules/epubjs/dist/epub.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.5/jszip.min.js"></script>
 
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
+
+    <title>Upload Files</title>
 </head>
+
 <body>
-<div id="example-epub"></div>
-<script>
-    var book = ePub("https://s3.amazonaws.com/moby-dick/OPS/package.opf");
+<div>BookMarkReader</div>
 
-    var rendition = book.renderTo("example-epub", {method: "default"});
-    var displayed = rendition.display();
+<form method="post" enctype="multipart/form-data">
+    <input type="file" name="files[]" multiple/>
+    <input type="submit" value="Upload File" name="submit"/>
+</form>
 
-
-</script>
+<script src="upload.js"></script>
 </body>
 </html>
