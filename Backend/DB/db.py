@@ -29,3 +29,4 @@ s.add(User())
 s.commit()
 s.close()
 close_all_sessions()
+#https://www.learndatasci.com/tutorials/using-databases-python-postgres-sqlalchemy-and-alembic/
