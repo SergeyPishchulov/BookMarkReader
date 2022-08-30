@@ -1,11 +1,9 @@
 from pydantic import BaseModel
 from typing import List
 
-from ValidationModels.Book import Book
 
-
-class Bookmark(BaseModel):
-    book: Book
+class BookmarkDto(BaseModel):
+    book_id: int
     quote: str
     comment: str
     tags: List[str] = []

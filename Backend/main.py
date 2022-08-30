@@ -2,23 +2,27 @@ import os
 import random
 import shutil
 from typing import List
-from fastapi import FastAPI, UploadFile, File
+from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
+from starlette import status
 
 import utils
+from Bookmark import BookmarkDto
+from DB.BookMarkRepo import BookMarkRepo
+from ValidationModels.Book import BookDto
+
 from DB.BookRepo import BookRepo
 from DB.UserRepo import UserRepo
 from DB.db import get_session
-from DB.models import User
-from ValidationModels.Book import Book
-from ValidationModels.Bookmark import Bookmark
+from DB.models import User, Book
 from sqlalchemy.orm.session import Session
 
 app = FastAPI()
 s: Session = get_session(need_recreate=False)
 book_repo = BookRepo(s)
 user_repo = UserRepo(s)
+bookmark_repo = BookMarkRepo(s)
 app.mount("/static", StaticFiles(directory="../Frontend"), name="static")
 
 
@@ -27,9 +31,6 @@ app.mount("/static", StaticFiles(directory="../Frontend"), name="static")
 @app.get("/")
 async def hello():
     return {"message": "Hello World"}
-    # with open('data.txt', 'r') as file:
-    #     data = file.read('../')
-    #     return HTMLResponse(content=)
 
 
 @app.post('/upload')
@@ -59,19 +60,43 @@ async def get_books():
 
 @app.get("/books/{book_id}")
 async def get_book_by_id(book_id):
-    return book_repo.get_book_by_id(book_id)
+    b: Book = book_repo.get_book_by_id(book_id)
+    if not b:
+        raise HTTPException(status_code=404, detail="Book not found")
+    with open(b.bookfile.path, "rb") as content:
+        return BookDto(id=b.id,
+                       title=b.title,
+                       last_read_page=b.last_read_page,
+                       content=content.read())
 
 
-@app.get("/bookmarks")
-async def get_bookmarks():
-    book = Book(title="EOSL")
-    return {"bookmarks": [Bookmark(book=book, quote="", comment="")]}
+@app.get("/books/{book_id}/bookmarks")
+async def get_bookmarks_by_book(book_id):
+    book: Book = book_repo.get_book_by_id(book_id)
+    if not book:
+        raise HTTPException(status_code=404, detail="Book not found")
+    return bookmark_repo.get_bookmarks_by_book(book)
 
 
-@app.post("/bookmarks/")
-async def create_bookmark(bookmark: Bookmark):
-    print("posted")
-    return bookmark
+@app.post("/books/{book_id}/bookmarks")
+async def get_bookmarks_by_book(book_id: int, bm: BookmarkDto):
+    book: Book = book_repo.get_book_by_id(book_id)
+    if not book:
+        raise HTTPException(status_code=404, detail="Book not found")
+    bookmark_repo.create_bookmark(bm.quote, bm.comment, book)
+
+
+#
+# @app.get("/bookmarks")
+# async def get_bookmarks():
+#     book = Book(title="EOSL")
+#     return {"bookmarks": [Bookmark(book=book, quote="", comment="")]}
+
+#
+# @app.post("/bookmarks/")
+# async def create_bookmark(bookmark: Bookmark):
+#     print("posted")
+#     return bookmark
 
 
 @app.get("/bookmarks/{book_mark_id}")
