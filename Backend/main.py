@@ -16,7 +16,7 @@ from ValidationModels.Bookmark import Bookmark
 from sqlalchemy.orm.session import Session
 
 app = FastAPI()
-s: Session = get_session()
+s: Session = get_session(need_recreate=False)
 book_repo = BookRepo(s)
 user_repo = UserRepo(s)
 app.mount("/static", StaticFiles(directory="../Frontend"), name="static")
@@ -49,6 +49,17 @@ def upload_file(files: List[UploadFile] = File(...)):
     book_repo.add_book(bf, user=user)
     print('book saved')
     # TODO tests: same file with different names, same names with different files
+
+
+@app.get("/books")
+async def get_books():
+    user = user_repo.get_default_user()  # TODO get from request
+    return book_repo.get_books_by_user(user)
+
+
+@app.get("/books/{book_id}")
+async def get_book_by_id(book_id):
+    return book_repo.get_book_by_id(book_id)
 
 
 @app.get("/bookmarks")

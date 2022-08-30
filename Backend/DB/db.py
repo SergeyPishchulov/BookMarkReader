@@ -16,7 +16,7 @@ def recreate_database(engine):
 # Base.metadata.tables['summary_inherited']('summary_inherited').add_is_dependent_on(summary)
 # https://www.learndatasci.com/tutorials/using-databases-python-postgres-sqlalchemy-and-alembic/
 
-def get_session() -> Session:
+def get_session(need_recreate) -> Session:
     close_all_sessions()
 
     engine = create_engine(DATABASE_URI)
@@ -24,8 +24,8 @@ def get_session() -> Session:
     # Base.metadata.create_all(engine)
     # Base.metadata.drop_all(engine)
     MSession = sessionmaker(bind=engine)
-
-    recreate_database(engine)
+    if need_recreate:
+        recreate_database(engine)
     s = MSession()
     s.add(User(name="Ronaldo"))
     recv = s.query(User).filter_by(name="Ronaldo").first().name
@@ -36,4 +36,4 @@ def get_session() -> Session:
     return s
 
 
-get_session()
+# get_session()

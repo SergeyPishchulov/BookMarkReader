@@ -1,5 +1,5 @@
 from sqlalchemy.orm.session import Session
-from typing import Optional
+from typing import Optional, List
 from DB.models import User, BookFile, Book
 
 
@@ -26,3 +26,9 @@ class BookRepo:
 
     def get_book_file_by_hash(self, bf_hash: str) -> Optional[BookFile]:
         return self.s.query(BookFile).filter_by(file_hash=bf_hash).first()
+
+    def get_books_by_user(self, user: User) -> List[Book]:
+        return self.s.query(Book).filter_by(user=user).all()
+
+    def get_book_by_id(self, book_id) -> Optional[Book]:
+        return self.s.query(Book).filter_by(id=book_id).first()
