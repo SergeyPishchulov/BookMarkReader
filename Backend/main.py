@@ -1,10 +1,12 @@
 import os
+import random
 import shutil
 from typing import List
 from fastapi import FastAPI, UploadFile, File
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 
+import utils
 from DB.BookRepo import BookRepo
 from DB.UserRepo import UserRepo
 from DB.db import get_session
@@ -33,16 +35,20 @@ async def hello():
 @app.post('/upload')
 def upload_file(files: List[UploadFile] = File(...)):
     file = files[0]
-    file_hash = hash(file.file)  # TODO this hash depends on request. make hash dependent only from file content
-    bf = book_repo.get_book_file_by_hash(file_hash)
-    if not bf:
-        path = f"FileStorage/{file_hash}{file.filename}"
-        with open(path, "wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
-            bf = book_repo.create_book_file(path=path, bf_hash=file_hash)
+    tmp_path = f"FileStorage/{random.randint(10 ** 8, 10 ** 9)}{file.filename}"
+    with open(tmp_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+    file_hash = utils.md5(tmp_path)
+    existed = book_repo.get_book_file_by_hash(file_hash)
+    if existed:
+        bf = existed
+        os.remove(tmp_path)
+    else:
+        bf = book_repo.create_book_file(path=tmp_path, bf_hash=file_hash)
     user = user_repo.get_default_user()  # TODO get from request
     book_repo.add_book(bf, user=user)
     print('book saved')
+    # TODO tests: same file with different names, same names with different files
 
 
 @app.get("/bookmarks")

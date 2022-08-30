@@ -28,7 +28,7 @@ class Book(Base):
 class BookFile(Base):
     __tablename__ = "bookfile"
     id = Column(Integer, primary_key=True)
-    file_hash = Column(BigInteger, nullable=False)
+    file_hash = Column(String, nullable=False)
     path = Column(String)
     books = relationship("Book", back_populates="bookfile")
 
