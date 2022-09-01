@@ -2,7 +2,7 @@ from pydantic import BaseModel
 from typing import List
 
 
-class BookmarkDto(BaseModel):
+class bookmark_dto(BaseModel):
     book_id: int
     quote: str
     comment: str

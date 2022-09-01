@@ -18,11 +18,13 @@ class BookRepo:
         self.s.commit()
         return bf
 
-    def add_book(self, bf: BookFile, user: User):
+    def add_book(self, bf: BookFile, user: User) -> Book:
         if not bf:
             raise Exception()
-        self.s.add(Book(user=user, bookfile=bf))
+        book = Book(user=user, bookfile=bf)
+        self.s.add(book)
         self.s.commit()  # TODO constraint: can add (bf, u) only once
+        return book
 
     def get_book_file_by_hash(self, bf_hash: str) -> Optional[BookFile]:
         return self.s.query(BookFile).filter_by(file_hash=bf_hash).first()

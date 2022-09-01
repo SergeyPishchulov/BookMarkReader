@@ -1,4 +1,4 @@
-const url = '/upload'
+const url = '/books'
 const form = document.querySelector('form')
 
 form.addEventListener('submit', (e) => {

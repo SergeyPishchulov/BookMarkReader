@@ -1,3 +1,4 @@
-import random
+import pathlib
 
-print(random.randint(10**8, 10 ** 9))
+p = pathlib.Path(__file__).parent.resolve()
+print(p)

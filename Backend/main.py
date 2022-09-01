@@ -1,42 +1,73 @@
 import os
+import pathlib
 import random
 import shutil
 from typing import List
-from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi import FastAPI, UploadFile, File, HTTPException, Request
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from starlette import status
 
 import utils
-from Bookmark import BookmarkDto
+from DTOs.Bookmark import bookmark_dto
 from DB.BookMarkRepo import BookMarkRepo
-from ValidationModels.Book import BookDto
+from DTOs.book_dto import BookDto
 
 from DB.BookRepo import BookRepo
 from DB.UserRepo import UserRepo
 from DB.db import get_session
 from DB.models import User, Book
 from sqlalchemy.orm.session import Session
+import logging
 
+logger = logging.getLogger()
+logger.setLevel(logging.DEBUG)
+ch = logging.StreamHandler()
+# fh = logging.FileHandler(filename='./Logs/server.log', mode='w')  # DELETE in the begining
+formatter = logging.Formatter(
+    "%(asctime)s - %(module)s - %(funcName)s - line:%(lineno)d - %(levelname)s - %(message)s"
+)
+
+ch.setFormatter(formatter)
+# fh.setFormatter(formatter)
+logger.addHandler(ch)  # Exporting logs to the screen
+# logger.addHandler(fh)  # Exporting logs to a file
+
+DIR = pathlib.Path(__file__).parent.resolve()
 app = FastAPI()
-s: Session = get_session(need_recreate=False)
-book_repo = BookRepo(s)
-user_repo = UserRepo(s)
-bookmark_repo = BookMarkRepo(s)
-app.mount("/static", StaticFiles(directory="../Frontend"), name="static")
 
 
 # http://127.0.0.1:8000/static/index.html
 
+
+# @app.middleware("http")
+# async def request_middleware(request, call_next):
+#     # debug("Request started")
+#
+#     try:
+#         return await call_next(request)
+#
+#     except Exception as ex:
+#         logger.debug(f"Request failed: {ex}")
+#         raise HTTPException(status_code=505)
+#         # return JSONResponse(content={"success": False}, status_code=500)
+#
+#     # finally:
+#     #     assert request_id_contextvar.get() == request_id
+#     #     debug("Request ended")
+
+
 @app.get("/")
 async def hello():
+    logger.info("Hello=")
     return {"message": "Hello World"}
 
 
-@app.post('/upload')
-def upload_file(files: List[UploadFile] = File(...)):
+@app.post('/books')
+def upload_file(request: Request, files: List[UploadFile] = File(...)):
+    # logger.info(request)
     file = files[0]
-    tmp_path = f"FileStorage/{random.randint(10 ** 8, 10 ** 9)}{file.filename}"
+    tmp_path = f"{DIR}/FileStorage/{random.randint(10 ** 8, 10 ** 9)}{file.filename}"
     with open(tmp_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
     file_hash = utils.md5(tmp_path)
@@ -47,13 +78,15 @@ def upload_file(files: List[UploadFile] = File(...)):
     else:
         bf = book_repo.create_book_file(path=tmp_path, bf_hash=file_hash)
     user = user_repo.get_default_user()  # TODO get from request
-    book_repo.add_book(bf, user=user)
+    created = book_repo.add_book(bf, user=user)
     print('book saved')
+    return utils.get_book_dto(created)
     # TODO tests: same file with different names, same names with different files
 
 
 @app.get("/books")
-async def get_books():
+async def get_books(request: Request):
+    logger.info(request)
     user = user_repo.get_default_user()  # TODO get from request
     return book_repo.get_books_by_user(user)
 
@@ -63,11 +96,7 @@ async def get_book_by_id(book_id):
     b: Book = book_repo.get_book_by_id(book_id)
     if not b:
         raise HTTPException(status_code=404, detail="Book not found")
-    with open(b.bookfile.path, "rb") as content:
-        return BookDto(id=b.id,
-                       title=b.title,
-                       last_read_page=b.last_read_page,
-                       content=content.read())
+    return utils.get_book_dto(b)
 
 
 @app.get("/books/{book_id}/bookmarks")
@@ -79,7 +108,7 @@ async def get_bookmarks_by_book(book_id):
 
 
 @app.post("/books/{book_id}/bookmarks")
-async def get_bookmarks_by_book(book_id: int, bm: BookmarkDto):
+async def get_bookmarks_by_book(book_id: int, bm: bookmark_dto):
     book: Book = book_repo.get_book_by_id(book_id)
     if not book:
         raise HTTPException(status_code=404, detail="Book not found")
@@ -102,3 +131,11 @@ async def get_bookmarks_by_book(book_id: int, bm: BookmarkDto):
 @app.get("/bookmarks/{book_mark_id}")
 async def get_bookmark(book_mark_id):
     return {"bookmarks": [1, 2, 3]}
+
+
+s: Session = get_session(need_recreate=False)
+book_repo = BookRepo(s)
+user_repo = UserRepo(s)
+bookmark_repo = BookMarkRepo(s)
+app.mount(f"/static", StaticFiles(directory=f"{pathlib.Path(__file__).parent.parent.resolve()}/Frontend"),
+          name="static")
