@@ -1,3 +1,5 @@
+import shutil
+
 from fastapi.testclient import TestClient
 
 from main import app
@@ -20,3 +22,26 @@ def test_book_is_achievable_after_creating():
     assert response.status_code == 200
     got = response.json()
     assert got['id'] == created['id']
+
+
+def test_2_books_with_same_file_are_different():
+    shutil.rmtree('./FileStorage')
+    file_name = 'example_for_testing.txt'
+    with open(f"TestFileSource/{file_name}", "rb") as f:
+        created1 = client.post("/books", files={"files": (file_name, f)}).json()
+        pass
+        created2 = client.post("/books", files={"files": (file_name, f)}).json()
+    got1 = client.get(f"/books/{created1['id']}").json()
+    got2 = client.get(f"/books/{created2['id']}").json()
+
+    assert got1['id'] != got2['id']
+
+# def test_books_with_eq_names_and_diff_files_are_different():
+#     file_name = 'example_for_testing.txt'
+#     with open(f"TestFileSource/{file_name}", "rb") as f:
+#         created1 = client.post("/books", files={"files": (file_name, f)}).json()
+#         created2 = client.post("/books", files={"files": (file_name, f)}).json()
+#     got1 = client.get(f"/books/{created1['id']}").json()
+#     got2 = client.get(f"/books/{created2['id']}").json()
+#
+#     assert got1['id'] != got2['id']

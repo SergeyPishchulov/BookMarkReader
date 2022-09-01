@@ -3,6 +3,8 @@ import pathlib
 import random
 import shutil
 from typing import List
+
+import aiofiles as aiofiles
 from fastapi import FastAPI, UploadFile, File, HTTPException, Request
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
@@ -64,19 +66,23 @@ async def hello():
 
 
 @app.post('/books')
-def upload_file(request: Request, files: List[UploadFile] = File(...)):
+async def upload_file(request: Request, files: List[UploadFile] = File(...)):
     # logger.info(request)
-    file = files[0]
-    tmp_path = f"{DIR}/FileStorage/{random.randint(10 ** 8, 10 ** 9)}{file.filename}"
-    with open(tmp_path, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
-    file_hash = utils.md5(tmp_path)
+    recv_file = files[0]
+    file_hash = utils.md5_file_decsr(recv_file.file)
+    print(file_hash)
+    logger.debug(file_hash)
     existed = book_repo.get_book_file_by_hash(file_hash)
     if existed:
         bf = existed
-        os.remove(tmp_path)
     else:
-        bf = book_repo.create_book_file(path=tmp_path, bf_hash=file_hash)
+        out_file_path = f"{DIR}/FileStorage/{random.randint(10 ** 8, 10 ** 9)}{recv_file.filename}"
+        async with aiofiles.open(out_file_path, 'wb') as out_file:
+            await recv_file.seek(0)
+            while content := await recv_file.read(1024):  # async read chunk
+                await out_file.write(content)  # async write chunk
+        recv_file.file.close()
+        bf = book_repo.create_book_file(path=out_file_path, bf_hash=file_hash)
     user = user_repo.get_default_user()  # TODO get from request
     created = book_repo.add_book(bf, user=user)
     print('book saved')
@@ -133,7 +139,7 @@ async def get_bookmark(book_mark_id):
     return {"bookmarks": [1, 2, 3]}
 
 
-s: Session = get_session(need_recreate=False)
+s: Session = get_session(need_recreate=True)
 book_repo = BookRepo(s)
 user_repo = UserRepo(s)
 bookmark_repo = BookMarkRepo(s)
