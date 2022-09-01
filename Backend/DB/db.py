@@ -1,3 +1,6 @@
+import os
+import shutil
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm.session import Session
@@ -7,7 +10,16 @@ from config import DATABASE_URI
 from sqlalchemy.orm.session import close_all_sessions
 
 
+def recreate_file_storage():
+    dir_path = '../FileStorage'
+    try:
+        shutil.rmtree(dir_path)
+    finally:
+        os.mkdir(dir_path)
+
+
 def recreate_database(engine):
+    recreate_file_storage()
     Base.metadata.drop_all(engine)
     Base.metadata.create_all(engine)
 
@@ -34,6 +46,5 @@ def get_session(need_recreate) -> Session:
     s.close()
     close_all_sessions()
     return s
-
 
 # get_session()

@@ -66,7 +66,7 @@ async def hello():
 
 
 @app.post('/books')
-async def upload_file(request: Request, files: List[UploadFile] = File(...)):
+async def upload_file(request: Request, files: List[UploadFile] = File(...)) -> BookDto:
     # logger.info(request)
     recv_file = files[0]
     file_hash = utils.md5_file_decsr(recv_file.file)

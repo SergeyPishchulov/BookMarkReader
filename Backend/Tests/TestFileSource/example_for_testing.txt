@@ -1,1 +1,1 @@
-Hello! This is example sent from pytest
+Hello! This is example sent from pytestThis is extra informationThis is extra information
