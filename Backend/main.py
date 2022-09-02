@@ -13,7 +13,7 @@ from starlette import status
 import utils
 from DTOs.bookmarkdto import BookmarkDto
 from DB.BookMarkRepo import BookMarkRepo
-from DTOs.book_dto import BookDto
+from DTOs.book_dto import BookDto, BookContentlessDto
 
 from DB.BookRepo import BookRepo
 from DB.UserRepo import UserRepo
@@ -89,9 +89,9 @@ async def upload_file(request: Request, files: List[UploadFile] = File(...)) -> 
     return utils.get_book_dto(created)
 
 
-@app.get("/books")
+@app.get("/books", response_model=List[BookContentlessDto])
 async def get_books(request: Request):
-    logger.info(request)
+    # logger.info(request)
     user = user_repo.get_default_user()  # TODO get from request
     return book_repo.get_books_by_user(user)
 
@@ -104,7 +104,7 @@ async def get_book_by_id(book_id):
     return utils.get_book_dto(b)
 
 
-@app.get("/books/{book_id}/bookmarks")
+@app.get("/books/{book_id}/bookmarks", response_model=List[BookmarkDto])
 async def get_bookmarks_by_book(book_id):
     book: Book = book_repo.get_book_by_id(book_id)
     if not book:

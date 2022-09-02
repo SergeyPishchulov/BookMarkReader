@@ -21,6 +21,4 @@ def test_bookmark_is_achievable_after_creating():
     bkmks_by_book = client.get(f"books/{book['id']}/bookmarks").json()
     assert any(d['quote'] == dto.quote for d in bkmks_by_book)
     all_bkmks = client.get(f"/bookmarks").json()
-    print("^" * 10)
-    print(all_bkmks)
     assert any(d['quote'] == dto.quote for d in all_bkmks)
