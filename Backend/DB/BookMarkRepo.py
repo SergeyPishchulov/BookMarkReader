@@ -10,6 +10,14 @@ class BookMarkRepo:
     def get_bookmarks_by_book(self, book: Book) -> List[Bookmark]:
         return self.s.query(Bookmark).filter_by(book=book).all()
 
+    def get_bookmarks_by_user(self, user: User) -> List[Bookmark]:
+        # books = self.s.query(Book).filter_by(user=user).all()
+        q = self.s.query(
+            Bookmark, Book,
+        ).filter(
+            Book.user == user, Bookmark.book_id == Book.id).all()
+        return [bmk for bmk, book in q]
+
     def create_bookmark(self, quote: str, comment: str, book: Book) -> Bookmark:
         bm = Bookmark(quote=quote, comment=comment, book=book)
         self.s.add(bm)

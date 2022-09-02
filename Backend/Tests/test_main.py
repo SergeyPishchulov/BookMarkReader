@@ -44,7 +44,7 @@ def test_books_with_eq_names_and_diff_files_are_different():
     with open(f"TestFileSource/{file_name}", "rb") as f:
         created1 = client.post("/books", files={"files": (file_name, f)}).json()
     with open(f"TestFileSource/{file_name}", 'a') as f:
-        f.write("This is extra information")
+        f.write("EXTRA")
     with open(f"TestFileSource/{file_name}", "rb") as f:
         created2 = client.post("/books", files={"files": (file_name, f)}).json()
 

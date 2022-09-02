@@ -26,5 +26,4 @@ def get_book_dto(book: Book) -> BookDto:
                        last_read_page=book.last_read_page,
                        content=content.read())
 
-# print(md5('main2.py'))
-# print(md5('main.py'))
+# TODO связь между sqlalchemy & pydantic

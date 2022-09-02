@@ -11,7 +11,7 @@ from fastapi.staticfiles import StaticFiles
 from starlette import status
 
 import utils
-from DTOs.Bookmark import bookmark_dto
+from DTOs.bookmarkdto import BookmarkDto
 from DB.BookMarkRepo import BookMarkRepo
 from DTOs.book_dto import BookDto
 
@@ -87,7 +87,6 @@ async def upload_file(request: Request, files: List[UploadFile] = File(...)) -> 
     created = book_repo.add_book(bf, user=user)
     print('book saved')
     return utils.get_book_dto(created)
-    # TODO tests: same file with different names, same names with different files
 
 
 @app.get("/books")
@@ -97,7 +96,7 @@ async def get_books(request: Request):
     return book_repo.get_books_by_user(user)
 
 
-@app.get("/books/{book_id}")
+@app.get("/books/{book_id}", response_model=BookDto)
 async def get_book_by_id(book_id):
     b: Book = book_repo.get_book_by_id(book_id)
     if not b:
@@ -113,33 +112,25 @@ async def get_bookmarks_by_book(book_id):
     return bookmark_repo.get_bookmarks_by_book(book)
 
 
-@app.post("/books/{book_id}/bookmarks")
-async def get_bookmarks_by_book(book_id: int, bm: bookmark_dto):
+@app.post("/books/{book_id}/bookmarks", response_model=BookmarkDto)
+async def get_bookmarks_by_book(book_id: int, bm: BookmarkDto):
+    print("posted bookmark")
     book: Book = book_repo.get_book_by_id(book_id)
     if not book:
         raise HTTPException(status_code=404, detail="Book not found")
-    bookmark_repo.create_bookmark(bm.quote, bm.comment, book)
+    return bookmark_repo.create_bookmark(bm.quote, bm.comment, book)
 
 
-#
-# @app.get("/bookmarks")
-# async def get_bookmarks():
-#     book = Book(title="EOSL")
-#     return {"bookmarks": [Bookmark(book=book, quote="", comment="")]}
-
-#
-# @app.post("/bookmarks/")
-# async def create_bookmark(bookmark: Bookmark):
-#     print("posted")
-#     return bookmark
+@app.get("/bookmarks", response_model=List[BookmarkDto])
+async def get_bookmarks():
+    user = user_repo.get_default_user()
+    bkmks_orms = bookmark_repo.get_bookmarks_by_user(user)
+    # print(bkmks_orms[0])
+    return bkmks_orms
+    # return [BookmarkDto.from_orm(x) for x in bkmks_orms]
 
 
-@app.get("/bookmarks/{book_mark_id}")
-async def get_bookmark(book_mark_id):
-    return {"bookmarks": [1, 2, 3]}
-
-
-s: Session = get_session(need_recreate=True)
+s: Session = get_session(need_recreate=1)
 book_repo = BookRepo(s)
 user_repo = UserRepo(s)
 bookmark_repo = BookMarkRepo(s)

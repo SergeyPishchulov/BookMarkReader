@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Integer, Date, ForeignKey, BigInteger
+from sqlalchemy import Column, String, Integer, Date, ForeignKey, BigInteger, inspect
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -43,6 +43,9 @@ class Bookmark(Base):
     book_id = Column(Integer, ForeignKey('books.id'))
     book = relationship("Book", back_populates="bookmarks")
     tags = relationship("Tag", back_populates="bookmark")
+
+    def __repr__(self):
+        return self.quote
 
 
 class Tag(Base):
