@@ -21,6 +21,9 @@ from DB.db import get_session
 from DB.models import User, Book
 from sqlalchemy.orm.session import Session
 import logging
+import mimetypes
+
+mimetypes.init()
 
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
@@ -130,9 +133,14 @@ async def get_bookmarks():
     # return [BookmarkDto.from_orm(x) for x in bkmks_orms]
 
 
+mimetypes.add_type('application/javascript', '.js')
+
 s: Session = get_session(need_recreate=1)
 book_repo = BookRepo(s)
 user_repo = UserRepo(s)
 bookmark_repo = BookMarkRepo(s)
 app.mount(f"/static", StaticFiles(directory=f"{pathlib.Path(__file__).parent.parent.resolve()}/Frontend"),
           name="static")
+
+app.mount(f"/treinetic", StaticFiles(directory=f"{pathlib.Path(__file__).parent.parent.resolve()}/distTreinetic"),
+          name="treinetic")

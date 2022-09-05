@@ -11,7 +11,7 @@ from sqlalchemy.orm.session import close_all_sessions
 
 
 def recreate_file_storage():
-    dir_path = '../FileStorage'
+    dir_path = '../Backend/FileStorage'
     try:
         shutil.rmtree(dir_path)
     finally:
