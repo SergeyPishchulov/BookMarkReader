@@ -9,6 +9,7 @@ from fastapi import FastAPI, UploadFile, File, HTTPException, Request
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from starlette import status
+from starlette.templating import Jinja2Templates
 
 import utils
 from DTOs.bookmarkdto import BookmarkDto
@@ -41,7 +42,6 @@ logger.addHandler(ch)  # Exporting logs to the screen
 DIR = pathlib.Path(__file__).parent.resolve()
 app = FastAPI()
 
-
 # http://127.0.0.1:8000/static/index.html
 
 
@@ -60,13 +60,16 @@ app = FastAPI()
 #     # finally:
 #     #     assert request_id_contextvar.get() == request_id
 #     #     debug("Request ended")
+templates = Jinja2Templates(directory=f"{pathlib.Path(__file__).parent.parent.resolve()}/Frontend")
 
 
-@app.get("/")
-async def hello():
-    logger.info("Hello=")
-    return {"message": "Hello World"}
+@app.get("/", response_class=HTMLResponse)
+async def hello(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
 
+@app.get("/reader", response_class=HTMLResponse)
+async def reader(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
 
 @app.post('/books')
 async def upload_file(request: Request, files: List[UploadFile] = File(...)) -> BookDto:
@@ -135,7 +138,7 @@ async def get_bookmarks():
 
 mimetypes.add_type('application/javascript', '.js')
 
-s: Session = get_session(need_recreate=1)
+s: Session = get_session(need_recreate=0)
 book_repo = BookRepo(s)
 user_repo = UserRepo(s)
 bookmark_repo = BookMarkRepo(s)
