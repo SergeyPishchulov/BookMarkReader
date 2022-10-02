@@ -4,9 +4,13 @@ import string
 from fastapi.testclient import TestClient
 
 from bookmarkdto import BookmarkDto
-from main import app
+from main_old import app
 
 client = TestClient(app)
+
+
+def test_a():
+    assert 1 == 1
 
 
 def test_bookmark_is_achievable_after_creating():

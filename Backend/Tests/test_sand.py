@@ -1,10 +1,12 @@
-# import os
-# import shutil
-#
-#
-# def recreate_file_storage():
-#     dir_path = '../FileStorage'
-#     try:
-#         shutil.rmtree(dir_path)
-#     finally:
-#         os.mkdir(dir_path)
+import random
+import string
+from fastapi.testclient import TestClient
+
+from bookmarkdto import BookmarkDto
+from main_old import app
+
+client = TestClient(app)
+
+
+def test_a():
+    assert 1 == 1

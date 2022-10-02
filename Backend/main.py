@@ -1,160 +1,26 @@
-import os
-import pathlib
-import random
-import shutil
-from typing import List
+import uvicorn
+from fastapi import FastAPI, APIRouter, Depends
 
-import aiofiles as aiofiles
-from fastapi import FastAPI, UploadFile, File, HTTPException, Request
-from fastapi.responses import HTMLResponse
-from fastapi.staticfiles import StaticFiles
-from starlette import status
-from starlette.templating import Jinja2Templates
-
-import utils
-from DTOs.bookmarkdto import BookmarkDto
 from DB.BookMarkRepo import BookMarkRepo
-from DTOs.book_dto import BookDto, BookContentlessDto
-
+from api.bookmarks import router as books_router, bookmark_router
+from sqlalchemy.orm.session import Session
 from DB.BookRepo import BookRepo
 from DB.UserRepo import UserRepo
 from DB.db import get_session
-from DB.models import User, Book
-from sqlalchemy.orm.session import Session
 import logging
-import mimetypes
 
-mimetypes.init()
+from api.books import book_router
+from services import Services
 
-logger = logging.getLogger()
-logger.setLevel(logging.DEBUG)
-ch = logging.StreamHandler()
-# fh = logging.FileHandler(filename='./Logs/server.log', mode='w')  # DELETE in the begining
-formatter = logging.Formatter(
-    "%(asctime)s - %(module)s - %(funcName)s - line:%(lineno)d - %(levelname)s - %(message)s"
-)
-
-ch.setFormatter(formatter)
-# fh.setFormatter(formatter)
-logger.addHandler(ch)  # Exporting logs to the screen
-# logger.addHandler(fh)  # Exporting logs to a file
-
-DIR = pathlib.Path(__file__).parent.resolve()
 app = FastAPI()
-
-# http://127.0.0.1:8000/static/index.html
-
-
-# @app.middleware("http")
-# async def request_middleware(request, call_next):
-#     # debug("Request started")
-#
-#     try:
-#         return await call_next(request)
-#
-#     except Exception as ex:
-#         logger.debug(f"Request failed: {ex}")
-#         raise HTTPException(status_code=505)
-#         # return JSONResponse(content={"success": False}, status_code=500)
-#
-#     # finally:
-#     #     assert request_id_contextvar.get() == request_id
-#     #     debug("Request ended")
-templates = Jinja2Templates(directory=f"{pathlib.Path(__file__).parent.parent.resolve()}/Frontend")
-
-
-@app.get("/", response_class=HTMLResponse)
-async def hello(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
-
-
-@app.get("/reader/{book_id}", response_class=HTMLResponse)
-async def reader(request: Request, book_id):
-    book = book_repo.get_book_by_id(book_id)
-    path = book.bookfile.path
-    return templates.TemplateResponse("/distTreinetic/sample/index.html", {"request": request, "book_name": path})
-
-
-@app.post('/books')
-async def upload_file(request: Request, files: List[UploadFile] = File(...)):
-    # logger.info(request)
-    recv_file = files[0]
-    file_hash = utils.md5_file_decsr(recv_file.file)
-    print(file_hash)
-    logger.debug(file_hash)
-    existed = book_repo.get_book_file_by_hash(file_hash)
-    if existed:
-        bf = existed
-    else:
-        out_file_path = f"/FileStorage/{random.randint(10 ** 8, 10 ** 9)}{recv_file.filename}"
-        full_path = str(DIR) + out_file_path
-        async with aiofiles.open(full_path, 'wb') as out_file:
-            await recv_file.seek(0)
-            while content := await recv_file.read(1024):  # async read chunk
-                await out_file.write(content)  # async write chunk
-        recv_file.file.close()
-        bf = book_repo.create_book_file(path=out_file_path, bf_hash=file_hash)
-    user = user_repo.get_default_user()  # TODO get from request
-    created = book_repo.add_book(bf, user=user, title=recv_file.filename)
-    print('book saved')
-    return utils.get_book_dto(created)
-
-
-@app.get("/books", response_model=List[BookContentlessDto])
-async def get_books(request: Request):
-    # logger.info(request)
-    user = user_repo.get_default_user()  # TODO get from request
-    return book_repo.get_books_by_user(user)
-
-
-@app.get("/books/{book_id}", response_model=BookDto)
-async def get_book_by_id(book_id):
-    b: Book = book_repo.get_book_by_id(book_id)
-    if not b:
-        raise HTTPException(status_code=404, detail="Book not found")
-    return utils.get_book_dto(b)
-
-
-@app.get("/books/{book_id}/bookmarks", response_model=List[BookmarkDto])
-async def get_bookmarks_by_book(book_id):
-    book: Book = book_repo.get_book_by_id(book_id)
-    if not book:
-        raise HTTPException(status_code=404, detail="Book not found")
-    return bookmark_repo.get_bookmarks_by_book(book)
-
-
-@app.post("/books/{book_id}/bookmarks", response_model=BookmarkDto)
-async def get_bookmarks_by_book(book_id: int, bm: BookmarkDto):
-    print("posted bookmark")
-    book: Book = book_repo.get_book_by_id(book_id)
-    if not book:
-        raise HTTPException(status_code=404, detail="Book not found")
-    return bookmark_repo.create_bookmark(bm.quote, bm.comment, book)
-
-
-@app.get("/bookmarks", response_model=List[BookmarkDto])
-async def get_bookmarks():
-    user = user_repo.get_default_user()
-    bkmks_orms = bookmark_repo.get_bookmarks_by_user(user)
-    # print(bkmks_orms[0])
-    return bkmks_orms
-    # return [BookmarkDto.from_orm(x) for x in bkmks_orms]
-
-
-mimetypes.add_type('application/javascript', '.js')
+app.include_router(bookmark_router)
+app.include_router(book_router)
 
 s: Session = get_session(need_recreate=0)
-book_repo = BookRepo(s)
-user_repo = UserRepo(s)
-bookmark_repo = BookMarkRepo(s)
-app.mount(f"/static", StaticFiles(directory=f"{pathlib.Path(__file__).parent.parent.resolve()}/Frontend"),
-          name="static")
+services = Services(s)
 
-app.mount(f"/reader",
-          StaticFiles(directory=f"{pathlib.Path(__file__).parent.parent.resolve()}/Frontend/distTreinetic/sample"),
-          name="treinetic")
+# app.include_router(router)
+# app.include_router(books_router, dependencies=Depends(services))
 
-app.mount(f"/FileStorage", StaticFiles(directory=f"{pathlib.Path(__file__).parent.resolve()}/FileStorage"),
-          name="FileStorage")
-#"GET /2/META-INF/container.xml HTTP/1.1" 404 Not Found
-#этот паренб думает что если обратиться на /2 то получишь epub файл
+# if __name__ == "__main__":
+#     uvicorn.run(app, host="0.0.0.0", port=8000)

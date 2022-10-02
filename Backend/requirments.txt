@@ -7,3 +7,6 @@ python-multipart==0.0.5
 six==1.16.0
 SQLAlchemy==1.4.40
 python-multipart
+fastapi
+requests
+sqlalchemy
