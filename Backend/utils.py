@@ -1,6 +1,6 @@
 import hashlib
 
-from DTOs.book_dto import BookDto
+from DTOs.book_dto import BookDto, BookContentlessDto
 from DB.models import Book
 
 
@@ -19,11 +19,14 @@ def md5(fname) -> str:
     return hash_md5.hexdigest()
 
 
-def get_book_dto(book: Book) -> BookDto:
-    with open(book.bookfile.path, "rb") as content:
-        return BookDto(id=book.id,
-                       title=book.title,
-                       last_read_page=book.last_read_page,
-                       content=content.read())
+def get_book_dto(book: Book) -> BookContentlessDto:
+    return BookContentlessDto(id=book.id,
+                              title=book.title,
+                              last_read_page=book.last_read_page)
+    # with open(book.bookfile.path, "rb") as content:
+    #     return BookDto(id=book.id,
+    #                    title=book.title,
+    #                    last_read_page=book.last_read_page,
+    #                    content=content.read())
 
 # TODO связь между sqlalchemy & pydantic

@@ -67,12 +67,16 @@ templates = Jinja2Templates(directory=f"{pathlib.Path(__file__).parent.parent.re
 async def hello(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
-@app.get("/reader", response_class=HTMLResponse)
-async def reader(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+
+@app.get("/reader/{book_id}", response_class=HTMLResponse)
+async def reader(request: Request, book_id):
+    book = book_repo.get_book_by_id(book_id)
+    path = book.bookfile.path
+    return templates.TemplateResponse("/distTreinetic/sample/index.html", {"request": request, "book_name": path})
+
 
 @app.post('/books')
-async def upload_file(request: Request, files: List[UploadFile] = File(...)) -> BookDto:
+async def upload_file(request: Request, files: List[UploadFile] = File(...)):
     # logger.info(request)
     recv_file = files[0]
     file_hash = utils.md5_file_decsr(recv_file.file)
@@ -82,15 +86,16 @@ async def upload_file(request: Request, files: List[UploadFile] = File(...)) -> 
     if existed:
         bf = existed
     else:
-        out_file_path = f"{DIR}/FileStorage/{random.randint(10 ** 8, 10 ** 9)}{recv_file.filename}"
-        async with aiofiles.open(out_file_path, 'wb') as out_file:
+        out_file_path = f"/FileStorage/{random.randint(10 ** 8, 10 ** 9)}{recv_file.filename}"
+        full_path = str(DIR) + out_file_path
+        async with aiofiles.open(full_path, 'wb') as out_file:
             await recv_file.seek(0)
             while content := await recv_file.read(1024):  # async read chunk
                 await out_file.write(content)  # async write chunk
         recv_file.file.close()
         bf = book_repo.create_book_file(path=out_file_path, bf_hash=file_hash)
     user = user_repo.get_default_user()  # TODO get from request
-    created = book_repo.add_book(bf, user=user)
+    created = book_repo.add_book(bf, user=user, title=recv_file.filename)
     print('book saved')
     return utils.get_book_dto(created)
 
@@ -145,5 +150,11 @@ bookmark_repo = BookMarkRepo(s)
 app.mount(f"/static", StaticFiles(directory=f"{pathlib.Path(__file__).parent.parent.resolve()}/Frontend"),
           name="static")
 
-app.mount(f"/treinetic", StaticFiles(directory=f"{pathlib.Path(__file__).parent.parent.resolve()}/distTreinetic"),
+app.mount(f"/reader",
+          StaticFiles(directory=f"{pathlib.Path(__file__).parent.parent.resolve()}/Frontend/distTreinetic/sample"),
           name="treinetic")
+
+app.mount(f"/FileStorage", StaticFiles(directory=f"{pathlib.Path(__file__).parent.resolve()}/FileStorage"),
+          name="FileStorage")
+#"GET /2/META-INF/container.xml HTTP/1.1" 404 Not Found
+#этот паренб думает что если обратиться на /2 то получишь epub файл

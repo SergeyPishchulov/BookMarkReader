@@ -18,10 +18,10 @@ class BookRepo:
         self.s.commit()
         return bf
 
-    def add_book(self, bf: BookFile, user: User) -> Book:
+    def add_book(self, bf: BookFile, user: User, title: str) -> Book:
         if not bf:
             raise Exception()
-        book = Book(user=user, bookfile=bf)
+        book = Book(user=user, bookfile=bf, title=title)
         self.s.add(book)
         self.s.commit()  # TODO constraint: can add (bf, u) only once
         return book
