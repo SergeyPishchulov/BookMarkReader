@@ -1,9 +1,12 @@
 import logging
+from functools import lru_cache
 
 from DB.BookMarkRepo import BookMarkRepo
 from DB.BookRepo import BookRepo
 from DB.UserRepo import UserRepo
 from sqlalchemy.orm.session import Session
+
+from DB.db import get_session
 
 
 class Services:
@@ -23,3 +26,11 @@ class Services:
         logger.addHandler(ch)  # Exporting logs to the screen
         # logger.addHandler(fh)  # Exporting logs to a file
         self.logger = logger
+
+
+s: Session = get_session(need_recreate=0)
+
+
+@lru_cache()
+def get_services():
+    return Services(s)

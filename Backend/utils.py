@@ -1,4 +1,8 @@
 import hashlib
+import pathlib
+import random
+
+import aiofiles
 
 from DTOs.book_dto import BookDto, BookContentlessDto
 from DB.models import Book
@@ -29,4 +33,19 @@ def get_book_dto(book: Book) -> BookContentlessDto:
     #                    last_read_page=book.last_read_page,
     #                    content=content.read())
 
+
 # TODO связь между sqlalchemy & pydantic
+
+
+DIR = pathlib.Path(__file__).parent.resolve()
+
+
+async def save_to_file_storage(recv_file) -> str:
+    out_file_path = f"/FileStorage/{random.randint(10 ** 8, 10 ** 9)}{recv_file.filename}"
+    full_path = str(DIR) + out_file_path
+    async with aiofiles.open(full_path, 'wb') as out_file:
+        await recv_file.seek(0)
+        while content := await recv_file.read(1024):  # async read chunk
+            await out_file.write(content)  # async write chunk
+    recv_file.file.close()
+    return out_file_path

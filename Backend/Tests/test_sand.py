@@ -3,7 +3,7 @@ import string
 from fastapi.testclient import TestClient
 
 from bookmarkdto import BookmarkDto
-from main_old import app
+from main import app
 
 client = TestClient(app)
 
