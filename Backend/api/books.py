@@ -5,7 +5,7 @@ from fastapi import FastAPI, UploadFile, File, HTTPException, Request, APIRouter
 import utils
 from DTOs.bookmarkdto import BookmarkDto
 from DB.BookMarkRepo import BookMarkRepo
-from DTOs.book_dto import BookDto, BookContentlessDto
+from DTOs.book_dto import BookDtoObsolete, BookDto
 
 from DB.models import User, Book
 from services import Services, get_services
@@ -18,6 +18,8 @@ from services import Services, get_services
 
 DIR = pathlib.Path(__file__).parent.parent.resolve()
 book_router = APIRouter(prefix="/api")
+
+
 # book_router = APIRouter()
 
 
@@ -37,13 +39,13 @@ async def upload_file(request: Request, files: List[UploadFile] = File(...),
     return utils.get_book_dto(created)
 
 
-@book_router.get("/books", response_model=List[BookContentlessDto])
+@book_router.get("/books", response_model=List[BookDto])
 async def get_books(request: Request, services: Services = Depends(get_services)):
     user = services.user_repo.get_default_user()  # TODO get from request
-    return services.book_repo.get_books_by_user(user)
+    return list(map(utils.get_book_dto, services.book_repo.get_books_by_user(user)))
 
 
-@book_router.get("/books/{book_id}", response_model=BookDto)
+@book_router.get("/books/{book_id}", response_model=BookDtoObsolete)
 async def get_book_by_id(book_id, services: Services = Depends(get_services)):
     b: Book = services.book_repo.get_book_by_id(book_id)
     if not b:

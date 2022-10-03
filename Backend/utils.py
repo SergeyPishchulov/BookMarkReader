@@ -4,8 +4,10 @@ import random
 
 import aiofiles
 
-from DTOs.book_dto import BookDto, BookContentlessDto
+from DTOs.book_dto import BookDtoObsolete, BookDto
 from DB.models import Book
+
+DIR = pathlib.Path(__file__).parent.resolve()
 
 
 def md5_file_decsr(f) -> str:
@@ -23,10 +25,12 @@ def md5(fname) -> str:
     return hash_md5.hexdigest()
 
 
-def get_book_dto(book: Book) -> BookContentlessDto:
-    return BookContentlessDto(id=book.id,
-                              title=book.title,
-                              last_read_page=book.last_read_page)
+def get_book_dto(book: Book) -> BookDto:
+    url = book.bookfile.path
+    return BookDto(id=book.id,
+                   title=book.title,
+                   last_read_page=book.last_read_page,
+                   file_url=url)
     # with open(book.bookfile.path, "rb") as content:
     #     return BookDto(id=book.id,
     #                    title=book.title,
@@ -35,9 +39,6 @@ def get_book_dto(book: Book) -> BookContentlessDto:
 
 
 # TODO связь между sqlalchemy & pydantic
-
-
-DIR = pathlib.Path(__file__).parent.resolve()
 
 
 async def save_to_file_storage(recv_file) -> str:
