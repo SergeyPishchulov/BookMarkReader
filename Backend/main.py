@@ -1,7 +1,11 @@
+import pathlib
 from functools import lru_cache
 
 import uvicorn
-from fastapi import FastAPI, APIRouter, Depends
+from fastapi import FastAPI, APIRouter, Depends, Request
+from fastapi.responses import HTMLResponse
+from starlette.staticfiles import StaticFiles
+from starlette.templating import Jinja2Templates
 
 from DB.BookMarkRepo import BookMarkRepo
 from api.bookmarks import bookmark_router
@@ -13,17 +17,43 @@ import logging
 
 from api.books import book_router
 from services import Services, get_services
+import mimetypes
 
+mimetypes.init()
 app = FastAPI()
 # app.include_router(bookmark_router)
 # app.include_router(book_router)
 #
+mimetypes.add_type('application/javascript', '.js')
 
+treinetic_templates = Jinja2Templates(
+    directory=f"{pathlib.Path(__file__).parent.parent.resolve()}/Frontend/distTreinetic/sample")
 
 services = get_services()
 
 app.include_router(book_router)
 app.include_router(bookmark_router)
+
+
+# @app.get("/reader")
+# async def reader(book_uri: str):
+#     user = services.user_repo.get_default_user()
+#     bkmks_orms = services.bookmark_repo.get_bookmarks_by_user(user)
+#     # print(bkmks_orms[0])
+#     return bkmks_orms
+
+
+@app.get("/reader", response_class=HTMLResponse)
+async def reader(request: Request):
+    return treinetic_templates.TemplateResponse("index.html", {"request": request})
+
+
+app.mount(f"/sample",
+          StaticFiles(directory=f"{pathlib.Path(__file__).parent.parent.resolve()}/Frontend/distTreinetic/sample"),
+          name="sample")
+
+app.mount(f"/static", StaticFiles(directory=f"{pathlib.Path(__file__).parent.parent.resolve()}/Frontend/static"),
+          name="static")
 # app.include_router(books_router, dependencies=Depends(services))
 
 if __name__ == "__main__":
