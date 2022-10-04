@@ -56,6 +56,9 @@ async def index(request: Request):
 #           StaticFiles(directory=f"{pathlib.Path(__file__).parent.parent.resolve()}/Frontend/distTreinetic/sample"),
 #           name="sample")
 #
+
+app.mount(f"/fs", StaticFiles(directory=f"{pathlib.Path(__file__).parent.resolve()}/FileStorage"),
+          name="fs")
 app.mount(f"/", StaticFiles(directory=f"{pathlib.Path(__file__).parent.parent.resolve()}/Frontend/static"),
           name="static")
 # app.include_router(books_router, dependencies=Depends(services))
