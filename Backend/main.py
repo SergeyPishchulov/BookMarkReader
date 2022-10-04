@@ -61,9 +61,9 @@ async def index(request: Request):
         status_code=status.HTTP_302_FOUND)
 
 
-@app.get("/sample/reader/{file_uri}")
-async def reader_w_book(file_uri, request: Request):
-    return reader_templates.TemplateResponse("reader.html", {"request": request})
+# @app.get("/sample/reader/{file_uri}")
+# async def reader_w_book(file_uri, request: Request):
+#     return reader_templates.TemplateResponse("reader.html", {"request": request})
     # return responses.RedirectResponse(
     #     '/static/index.html',
     #     status_code=status.HTTP_302_FOUND)
