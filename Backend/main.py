@@ -48,12 +48,12 @@ async def reader(request: Request):
     return treinetic_templates.TemplateResponse("index.html", {"request": request})
 
 
-app.mount(f"/sample",
-          StaticFiles(directory=f"{pathlib.Path(__file__).parent.parent.resolve()}/Frontend/distTreinetic/sample"),
-          name="sample")
-
-app.mount(f"/static", StaticFiles(directory=f"{pathlib.Path(__file__).parent.parent.resolve()}/Frontend/static"),
-          name="static")
+# app.mount(f"/sample",
+#           StaticFiles(directory=f"{pathlib.Path(__file__).parent.parent.resolve()}/Frontend/distTreinetic/sample"),
+#           name="sample")
+#
+# app.mount(f"/static", StaticFiles(directory=f"{pathlib.Path(__file__).parent.parent.resolve()}/Frontend/static"),
+#           name="static")
 # app.include_router(books_router, dependencies=Depends(services))
 
 if __name__ == "__main__":

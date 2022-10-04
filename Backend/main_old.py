@@ -38,7 +38,7 @@
 #
 # @app.get("/", response_class=HTMLResponse)
 # async def hello(request: Request):
-#     return templates.TemplateResponse("index1.html", {"request": request})
+#     return templates.TemplateResponse("subtle_index.html", {"request": request})
 #
 #
 # mimetypes.add_type('application/javascript', '.js')
