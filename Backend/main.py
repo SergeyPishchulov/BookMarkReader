@@ -26,8 +26,8 @@ mimetypes.add_type('application/javascript', '.js')
 # strongly_typed_templates = Jinja2Templates(
 #     directory=f"{pathlib.Path(__file__).parent.parent.resolve()}/Frontend/static")
 #
-# reader_templates = Jinja2Templates(
-#     directory=f"{pathlib.Path(__file__).parent.parent.resolve()}/Frontend/dist/sample")
+reader_templates = Jinja2Templates(
+    directory=f"{pathlib.Path(__file__).parent.parent.resolve()}/Frontend/dist/sample")
 services = get_services()
 
 app.include_router(book_router)
@@ -60,6 +60,15 @@ async def index(request: Request):
         '/static/index.html',
         status_code=status.HTTP_302_FOUND)
 
+
+@app.get("/sample/reader/{file_uri}")
+async def reader_w_book(file_uri, request: Request):
+    return reader_templates.TemplateResponse("reader.html", {"request": request})
+    # return responses.RedirectResponse(
+    #     '/static/index.html',
+    #     status_code=status.HTTP_302_FOUND)
+# app.mount(f"/sample/reader", StaticFiles(directory=f"{pathlib.Path(__file__).parent.parent.resolve()}/Frontend/dist/sample"),
+#           name="sample_proxy")
 
 # app.mount(f"/sample",
 #           StaticFiles(directory=f"{pathlib.Path(__file__).parent.parent.resolve()}/Frontend/distTreinetic_obsolete/sample"),
