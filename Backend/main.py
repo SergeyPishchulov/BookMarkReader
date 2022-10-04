@@ -21,9 +21,6 @@ import mimetypes
 
 mimetypes.init()
 app = FastAPI()
-# app.include_router(bookmark_router)
-# app.include_router(book_router)
-#
 mimetypes.add_type('application/javascript', '.js')
 #
 # strongly_typed_templates = Jinja2Templates(
