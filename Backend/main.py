@@ -25,10 +25,12 @@ app = FastAPI()
 # app.include_router(book_router)
 #
 mimetypes.add_type('application/javascript', '.js')
-
-strongly_typed_templates = Jinja2Templates(
-    directory=f"{pathlib.Path(__file__).parent.parent.resolve()}/Frontend/static")
-
+#
+# strongly_typed_templates = Jinja2Templates(
+#     directory=f"{pathlib.Path(__file__).parent.parent.resolve()}/Frontend/static")
+#
+# reader_templates = Jinja2Templates(
+#     directory=f"{pathlib.Path(__file__).parent.parent.resolve()}/Frontend/dist/sample")
 services = get_services()
 
 app.include_router(book_router)
@@ -47,20 +49,27 @@ app.include_router(bookmark_router)
 # async def reader(request: Request):
 #     return treinetic_templates.TemplateResponse("index.html", {"request": request})
 
-@app.get("/", response_class=HTMLResponse)
-async def index(request: Request):
-    return strongly_typed_templates.TemplateResponse("index.html", {"request": request})
+# @app.get("/", response_class=HTMLResponse)
+# async def index(request: Request):
+#     return strongly_typed_templates.TemplateResponse("index.html", {"request": request})
+
+
+# @app.get("/reader", response_class=HTMLResponse)
+# async def reader(request: Request):
+#     return reader_templates.TemplateResponse("sample/index.html", {"request": request})
 
 
 # app.mount(f"/sample",
-#           StaticFiles(directory=f"{pathlib.Path(__file__).parent.parent.resolve()}/Frontend/distTreinetic/sample"),
+#           StaticFiles(directory=f"{pathlib.Path(__file__).parent.parent.resolve()}/Frontend/distTreinetic_obsolete/sample"),
 #           name="sample")
 #
 
 app.mount(f"/fs", StaticFiles(directory=f"{pathlib.Path(__file__).parent.resolve()}/FileStorage"),
           name="fs")
-app.mount(f"/", StaticFiles(directory=f"{pathlib.Path(__file__).parent.parent.resolve()}/Frontend/static"),
+app.mount(f"/sample", StaticFiles(directory=f"{pathlib.Path(__file__).parent.parent.resolve()}/Frontend/dist/sample"),
           name="static")
+# app.mount(f"/", StaticFiles(directory=f"{pathlib.Path(__file__).parent.parent.resolve()}/Frontend/static"),
+#           name="static")
 # app.include_router(books_router, dependencies=Depends(services))
 
 if __name__ == "__main__":

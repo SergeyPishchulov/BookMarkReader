@@ -47,7 +47,7 @@
 #           name="static")
 #
 # app.mount(f"/reader",
-#           StaticFiles(directory=f"{pathlib.Path(__file__).parent.parent.resolve()}/Frontend/distTreinetic/sample"),
+#           StaticFiles(directory=f"{pathlib.Path(__file__).parent.parent.resolve()}/Frontend/distTreinetic_obsolete/sample"),
 #           name="treinetic")
 #
 # app.mount(f"/FileStorage", StaticFiles(directory=f"{pathlib.Path(__file__).parent.resolve()}/FileStorage"),

@@ -1,0 +1,8 @@
+2022-09-01 13:02:02,569 - server - serve - line:75 - INFO - Started server process [4812]
+2022-09-01 13:02:02,571 - on - startup - line:47 - INFO - Waiting for application startup.
+2022-09-01 13:02:02,572 - on - startup - line:61 - INFO - Application startup complete.
+2022-09-01 13:02:02,573 - server - _log_started_message - line:207 - INFO - Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+2022-09-01 13:02:10,021 - server - shutdown - line:253 - INFO - Shutting down
+2022-09-01 13:02:10,130 - on - shutdown - line:66 - INFO - Waiting for application shutdown.
+2022-09-01 13:02:10,131 - on - shutdown - line:77 - INFO - Application shutdown complete.
+2022-09-01 13:02:10,133 - server - serve - line:85 - INFO - Finished server process [4812]
