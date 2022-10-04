@@ -2,7 +2,7 @@ import pathlib
 from functools import lru_cache
 
 import uvicorn
-from fastapi import FastAPI, APIRouter, Depends, Request
+from fastapi import FastAPI, APIRouter, Depends, Request, responses, status
 from fastapi.responses import HTMLResponse
 from starlette.staticfiles import StaticFiles
 from starlette.templating import Jinja2Templates
@@ -47,16 +47,21 @@ app.include_router(bookmark_router)
 
 # @app.get("/reader", response_class=HTMLResponse)
 # async def reader(request: Request):
-#     return treinetic_templates.TemplateResponse("index.html", {"request": request})
-
+#     return treinetic_templates.TemplateResponse("reader.html", {"request": request})
+#
 # @app.get("/", response_class=HTMLResponse)
 # async def index(request: Request):
-#     return strongly_typed_templates.TemplateResponse("index.html", {"request": request})
+#     return strongly_typed_templates.TemplateResponse("reader.html", {"request": request})
 
 
 # @app.get("/reader", response_class=HTMLResponse)
 # async def reader(request: Request):
-#     return reader_templates.TemplateResponse("sample/index.html", {"request": request})
+#     return reader_templates.TemplateResponse("sample/reader.html", {"request": request})
+@app.get("/")
+async def index(request: Request):
+    return responses.RedirectResponse(
+        '/static/index.html',
+        status_code=status.HTTP_302_FOUND)
 
 
 # app.mount(f"/sample",
@@ -67,6 +72,8 @@ app.include_router(bookmark_router)
 app.mount(f"/fs", StaticFiles(directory=f"{pathlib.Path(__file__).parent.resolve()}/FileStorage"),
           name="fs")
 app.mount(f"/sample", StaticFiles(directory=f"{pathlib.Path(__file__).parent.parent.resolve()}/Frontend/dist/sample"),
+          name="sample")
+app.mount(f"/static", StaticFiles(directory=f"{pathlib.Path(__file__).parent.parent.resolve()}/Frontend/static"),
           name="static")
 # app.mount(f"/", StaticFiles(directory=f"{pathlib.Path(__file__).parent.parent.resolve()}/Frontend/static"),
 #           name="static")
