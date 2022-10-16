@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <script src="/assets/js/jquery-3.5.1.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <link rel="stylesheet" type="text/css"
+        href="../node_modules/@treinetic/treinetic-epub-reader/dist/TreineticEpubReader.min.css">
+    <script type="text/javascript"
+        src="../node_modules/@treinetic/treinetic-epub-reader/dist/TreineticEpubReader.min.js"></script>
+    <title>BMR</title>
+
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+
+    <title>Upload Files</title>
+</head>
+
+<body>
+    <div>BookMarkReader</div>
+
+    <form method="post" enctype="multipart/form-data">
+        <input type="file" name="files[]" multiple />
+        <input type="submit" value="Upload File" name="submit" />
+    </form>
+    <ul id="bookList">
+    </ul>
+    <div id="epub-reader-frame"></div>
+    <script src="upload.js"></script>
+    <script src=" main.js"></script>
+    <script>var exControls = TreineticEpubReader.handler();
+        exControls.registerEvent("onEpubLoadSuccess", function () {
+        
+        });
+        
+        exControls.registerEvent("onEpubLoadFail", function () {
+        
+        });
+        
+        exControls.registerEvent("onTOCLoaded", function (hasTOC) {
+            if (!hasTOC) {
+               let toc =  exControls.getTOCJson();
+            }
+            // you can use following api calls after this
+            /**
+            exControls.hasNextPage()
+            exControls.nextPage();
+            exControls.hasPrevPage()
+            exControls.prevPage();
+            exControls.makeBookMark();
+            exControls.changeFontSize(int);
+            exControls.changeColumnMaxWidth(int);
+            exControls.setTheme("theme-id-goes-here");
+            exControls.setScrollMode("scroll-type-id-goes-here");
+            exControls.setDisplayFormat("display-format-id-goes-here");
+        
+            extcontrols.getRecommendedFontSizeRange()
+            extcontrols.getRecommendedColumnWidthRange()
+            var list = extcontrols.getAvailableThemes();
+            var list = extcontrols.getAvailableScrollModes();
+            var list = extcontrols.getAvailableDisplayFormats();
+            var settings = extcontrols.getCurrentReaderSettings();
+            **/
+        });
+        
+        
+        // You can feed epub file as well as extracted path of the epub 
+        // if you are planning to use epub file directly make sure that worker js files inside `ZIPJS` the `dist` is copied outside to a accessible location.
+        // and set the root folder path of those files to 'jsLibRoot'  
+        var config = TreineticEpubReader.config();
+        config.jsLibRoot = "src/ZIPJS/";
+        
+        TreineticEpubReader.create("#epub-reader-frame");
+        TreineticEpubReader.open("../Backend/FileStorage/754919762mody-dick-rus.epub");</script>
+</body>
+
+</html>
