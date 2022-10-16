@@ -77,8 +77,8 @@ async def index(request: Request):
 
 app.mount(f"/fs", StaticFiles(directory=f"{pathlib.Path(__file__).parent.resolve()}/FileStorage"),
           name="fs")
-app.mount(f"/sample", StaticFiles(directory=f"{pathlib.Path(__file__).parent.parent.resolve()}/Frontend/dist/sample"),
-          name="sample")
+# app.mount(f"/sample", StaticFiles(directory=f"{pathlib.Path(__file__).parent.parent.resolve()}/Frontend/dist/sample"),
+#           name="sample")
 app.mount(f"/static", StaticFiles(directory=f"{pathlib.Path(__file__).parent.parent.resolve()}/Frontend/static"),
           name="static")
 # app.mount(f"/", StaticFiles(directory=f"{pathlib.Path(__file__).parent.parent.resolve()}/Frontend/static"),

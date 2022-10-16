@@ -31,15 +31,6 @@ def get_book_dto(book: Book) -> BookDto:
                    title=book.title,
                    last_read_page=book.last_read_page,
                    file_url="/fs/" + url)
-    # with open(book.bookfile.path, "rb") as content:
-    #     return BookDto(id=book.id,
-    #                    title=book.title,
-    #                    last_read_page=book.last_read_page,
-    #                    content=content.read())
-
-
-# TODO связь между sqlalchemy & pydantic
-
 
 async def save_to_file_storage(recv_file) -> str:
     out_file_path = f"{random.randint(10 ** 8, 10 ** 9)}{recv_file.filename}"
