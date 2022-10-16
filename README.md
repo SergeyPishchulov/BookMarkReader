@@ -19,7 +19,7 @@
 #
 #
 #
-Какие-то библиотеки, может полезные, ам ожет нет
+Какие-то библиотеки, может полезные, а может нет
 
 https://github.com/satorumurmur/bibi
 https://github.com/readium/awesome-readium#apps-based-on-readium-web
